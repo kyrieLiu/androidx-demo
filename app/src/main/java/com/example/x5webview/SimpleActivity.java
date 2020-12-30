@@ -10,6 +10,7 @@ import android.os.Message;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -43,7 +44,8 @@ public class SimpleActivity extends AppCompatActivity {
     private WebView webView;
 
     //private String webUrl = "https://192.168.199.100:3001/examination";
-    private String webUrl = "https://www.8000cloud.com/peerconnection_onebyone/room.html?room=1234";
+    // private String webUrl = "https://www.8000cloud.com/peerconnection_onebyone/room.html?room=1234";
+    private String webUrl = "http://recruit2.sit.zretchome.com/mutual-portal/";
     //private String webUrl = "http://192.168.199.100:8848/htmlDemo/file.html";
 
     private ValueCallback valueCallback;
@@ -59,7 +61,6 @@ public class SimpleActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.pb_webview_load);
         webView = findViewById(R.id.wv_web);
         requestPermission();
-        // initView();
     }
 
     private void initView() {
@@ -69,42 +70,6 @@ public class SimpleActivity extends AppCompatActivity {
         webView.loadUrl(webUrl);
         CookieSyncManager.createInstance(this);
         CookieSyncManager.getInstance().sync();
-    }
-
-    private void initContainer() {
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(true);
-        webView.loadUrl("https://www.8000cloud.com/peerconnection_onebyone/room.html?room=1234");
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                view.loadUrl(url);
-                return true;
-            }
-
-            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                handler.proceed();
-            }
-
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-            }
-        });
-
-        //判断页面加载的过程
-        webView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onProgressChanged(WebView view, int newProgress) {
-                // TODO Auto-generated method stub
-                if (newProgress == 100) {
-                    // 网页加载完成
-                    Log.d("加载完成...", "success");
-                } else {
-                    // 加载中
-                    Log.d("加载中...", +newProgress + "");
-                }
-            }
-        });
     }
 
 
@@ -157,11 +122,6 @@ public class SimpleActivity extends AppCompatActivity {
     // Web视图
     private class MyWebViewClient extends WebViewClient {
 
-//        @Override
-//        public void onReceivedSslError(WebView webView, SslErrorHandler sslErrorHandler, SslError sslError) {
-//            sslErrorHandler.proceed();
-//        }
-
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             view.loadUrl(url);
@@ -194,7 +154,9 @@ public class SimpleActivity extends AppCompatActivity {
         @Override
         public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
             valueCallback = filePathCallback;
+            Toast.makeText(SimpleActivity.this, "选择图片", Toast.LENGTH_SHORT).show();
             if (fileChooserParams.isCaptureEnabled()) {
+
             } else {
             }
             return true;
@@ -214,95 +176,13 @@ public class SimpleActivity extends AppCompatActivity {
 
     private PermissionHelper mHelper;
 
-    Handler handler = new Handler() {
-        public void handleMessage(Message msg) {
-            //要做的事情
-            super.handleMessage(msg);
-            Log.d("mytag", "发送消息");
-//            Intent intent = new Intent(WebActivity.this, SimpleActivity.class);
-//            startActivity(intent);
-//            boolean b = QbSdk.canLoadX5(getApplicationContext());
-//            Log.d("mytag", "onInstallFinish  是否可以加载X5内核 -->" + b);
-//            if (b){
-//                initContainer();
-//            }
-        }
-    };
-
-    public class MyThread implements Runnable {
-        @Override
-        public void run() {
-            // TODO Auto-generated method stub
-            try {
-                Thread.sleep(5000);//线程暂停10秒，单位毫秒
-                Message message = new Message();
-                message.what = 1;
-                handler.sendMessage(message);//发送消息
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-    }
-
     private void requestPermission() {
-        initX5();
         mHelper = new PermissionHelper(this);
         mHelper.requestPermissions("获取权限",
                 new PermissionHelper.PermissionListener() {
                     @Override
                     public void doAfterGrand(String... permission) {
-                        boolean b = QbSdk.canLoadX5(getApplicationContext());
-                        Log.d("mytag", "是否可以加载X5内核 -->" + b);
-                        if (!b) {
-                            initX5();
-                        }else{
-                            initContainer();
-                        }
-
-                        QbSdk.setDownloadWithoutWifi(true);
-                        QbSdk.setTbsListener(new TbsListener() {
-                            @Override
-                            public void onDownloadFinish(int i) {
-                                Log.d("mytag", "onDownloadFinish -->下载X5内核完成：" + i);
-                            }
-
-                            @Override
-                            public void onInstallFinish(int i) {
-                                Log.d("mytag", "onInstallFinish -->安装X5内核进度：" + i);
-//                                boolean b = QbSdk.canLoadX5(getApplicationContext());
-//                                Log.d("mytag", "onInstallFinish  是否可以加载X5内核 -->" + b);
-                                // initX5();
-//
-                                new Thread(new MyThread()).start();
-                            }
-
-                            @Override
-                            public void onDownloadProgress(int i) {
-                                Log.d("mytag", "onDownloadProgress -->下载X5内核进度：" + i);
-                            }
-                        });
-//                        HashMap map = new HashMap();
-//                        map.put(TbsCoreSettings.TBS_SETTINGS_USE_SPEEDY_CLASSLOADER, true);
-//                        map.put(TbsCoreSettings.TBS_SETTINGS_USE_DEXLOADER_SERVICE, true);
-//                        QbSdk.initTbsSettings(map);
-//                        QbSdk.PreInitCallback cb = new QbSdk.PreInitCallback() {
-//
-//                            @Override
-//                            public void onViewInitFinished(boolean arg0) {
-//                                // TODO Auto-generated method stub
-//                                //x5內核初始化完成的回调，为true表示x5内核加载成功，否则表示x5内核加载失败，会自动切换到系统内核。
-//                                Log.d("mytag", " onViewInit is " + arg0);
-//                                initContainer();
-//                            }
-//
-//                            @Override
-//                            public void onCoreInitFinished() {
-//                                Log.d("mytag", "finsih");
-//                            }
-//                        };
-//                        //x5内核初始化接口
-//                        QbSdk.initX5Environment(getApplicationContext(), cb);
+                        initView();
 
                     }
 
@@ -312,31 +192,7 @@ public class SimpleActivity extends AppCompatActivity {
                         mHelper.againWarnRequestPermission("获取权限", SimpleActivity.this);
                     }
                 }, Manifest.permission.MODIFY_AUDIO_SETTINGS, Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_NETWORK_STATE,
-                Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.READ_PHONE_STATE);
-    }
-
-    private void initX5() {
-        HashMap map = new HashMap();
-        map.put(TbsCoreSettings.TBS_SETTINGS_USE_SPEEDY_CLASSLOADER, true);
-        map.put(TbsCoreSettings.TBS_SETTINGS_USE_DEXLOADER_SERVICE, true);
-        QbSdk.initTbsSettings(map);
-        QbSdk.PreInitCallback cb = new QbSdk.PreInitCallback() {
-
-            @Override
-            public void onViewInitFinished(boolean arg0) {
-                // TODO Auto-generated method stub
-                //x5內核初始化完成的回调，为true表示x5内核加载成功，否则表示x5内核加载失败，会自动切换到系统内核。
-                Log.d("mytag", " onViewInitFinished is " + arg0);
-            }
-
-            @Override
-            public void onCoreInitFinished() {
-                Log.d("mytag", "finsih");
-            }
-        };
-        //x5内核初始化接口
-        QbSdk.initX5Environment(getApplicationContext(), cb);
+                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE);
     }
 
     //授权回调
@@ -346,56 +202,6 @@ public class SimpleActivity extends AppCompatActivity {
             mHelper.handleRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-//    private void requestPermission() {
-//        String[] perms = {Manifest.permission.MODIFY_AUDIO_SETTINGS, Manifest.permission.RECORD_AUDIO, Manifest.permission.CAPTURE_AUDIO_OUTPUT,Manifest.permission.CAMERA,
-//                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
-//        if (EasyPermissions.hasPermissions(this, perms)) {
-//
-//        } else {
-//            // Do not have permissions, request them now
-//            EasyPermissions.requestPermissions(this, "申请权限",
-//                    RC_CAMERA_AND_LOCATION, perms);
-//        }
-//    }
-
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//
-//        // Forward results to EasyPermissions
-//        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
-//    }
-
-
-//    @Override
-//    public boolean onKeyDown(int keyCode, KeyEvent event) {
-//        if (keyCode == KeyEvent.KEYCODE_BACK && webView.canGoBack()) {
-//            String lastPath = getCurrentPath();
-//            if ("paper".equals(lastPath) && isPreventBack) {
-//                showWarningDialog();
-//            } else {
-//                webView.goBack();
-//            }
-//            return true;
-//        }
-//        return super.onKeyDown(keyCode, event);
-//    }
-//
-//    @Override
-//    protected void onUserLeaveHint() {
-//        super.onUserLeaveHint();
-//        String lastPath = getCurrentPath();
-//        if ("paper".equals(lastPath) && isPreventBack) {
-//            webView.evaluateJavascript("javascript:clickHome()", new ValueCallback<String>() {
-//                @Override
-//                public void onReceiveValue(String value) {
-//                    //此处为 js 返回的结果
-//                    Log.d("tag", "发送成功");
-//                }
-//            });
-//        }
-//    }
 
     //js和java交互通道
     class InteractionChannel {
